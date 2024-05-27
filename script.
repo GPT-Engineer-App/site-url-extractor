@@ -1,0 +1,34 @@
+import requests
+from bs4 import BeautifulSoup
+
+def search_travelocity(site):
+    search_url = f"https://www.travelocity.com/Hotel-Search?destination={site}"
+    response = requests.get(search_url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Find the first result URL
+        first_result = soup.find('a', class_='listing__link')
+        if first_result:
+            return first_result['href']
+    return None
+
+def main():
+    with open('sites.txt', 'r') as file:
+        sites = file.readlines()
+
+    results = []
+    for site in sites:
+        site = site.strip()
+        if site:
+            url = search_travelocity(site)
+            if url:
+                results.append(url)
+            else:
+                results.append(f"No results for {site}")
+
+    with open('results.txt', 'w') as file:
+        for result in results:
+            file.write(result + '\n')
+
+if __name__ == "__main__":
+    main()
